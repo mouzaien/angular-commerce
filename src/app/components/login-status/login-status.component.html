@@ -1,0 +1,13 @@
+<div class="login-status-header">
+
+    <div *ngIf="isAuthenticated && fullUserName" class="login-status-user-info">
+         {{ fullUserName }}!
+    </div>
+
+    <button *ngIf="!(isAuthenticated && fullUserName)" routerLink="/login" class="security-btn ml-1">Login</button>
+
+    <button *ngIf="isAuthenticated && fullUserName" (click)="logout()" class="security-btn">Logout</button>
+
+    <button  routerLink="/members" class="security-btn ml-1">Member</button>
+
+</div>
