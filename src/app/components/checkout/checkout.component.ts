@@ -17,6 +17,7 @@ import { Luv2ShopValidators } from 'src/app/validators/luv2-shop-validators';
   styleUrls: ['./checkout.component.css']
 })
 export class CheckoutComponent implements OnInit {
+  storage :Storage=sessionStorage;
   checkoutFormGroup !: FormGroup;
   totalQuantity: number = 0.00;
   totalPrice: number = 0.00;
@@ -34,6 +35,8 @@ export class CheckoutComponent implements OnInit {
 
   ngOnInit(): void {
     this.reviewCartDetails();
+    const logUserEmail =JSON.parse(this.storage.getItem('userEmail')!);
+
     this.checkoutFormGroup = this.formBuilder.group({
       customer: this.formBuilder.group({
        // firstName: [''],
@@ -42,7 +45,7 @@ export class CheckoutComponent implements OnInit {
            Validators.minLength(2), 
            Luv2ShopValidators.notOnlyWhitespace]),
         lastName: new FormControl('',[Validators.required, Validators.minLength(2)]),
-        email: new FormControl('',[Validators.required, Validators.pattern('[a-z0-9._%-]+@[A-Za-z0-9._%-]+\\.[a-z]{2,4}$')]),
+        email: new FormControl(logUserEmail,[Validators.required, Validators.pattern('[a-z0-9._%-]+@[A-Za-z0-9._%-]+\\.[a-z]{2,4}$')]),
       }
       ),
 
