@@ -872,12 +872,12 @@ footer ul li{
       .logo{
         text-align:center
     }
-    .header-desktop{
+    /* .header-desktop{
         position:relative;
         top:0;
         left:0;
         height:80px
-    }
+    } */
     .header-wrap{
         -webkit-box-orient:vertical;
         -webkit-box-direction:normal;
