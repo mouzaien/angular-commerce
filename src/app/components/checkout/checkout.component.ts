@@ -43,7 +43,7 @@ export class CheckoutComponent implements OnInit {
 
   ngOnInit(): void {
 
-     this.setupStripePaymentForm();
+    this.setupStripePaymentForm();
 
 
     this.reviewCartDetails();
@@ -132,23 +132,23 @@ export class CheckoutComponent implements OnInit {
 
   }
   setupStripePaymentForm() {
-// get a handle to stripe element
-   var elements = this.stripe.elements();
-   //create card element and hide a zip code 
-   this.cardElement = elements.create('card', {hidePostalCode : true});
+    // get a handle to stripe element
+    var elements = this.stripe.elements();
+    //create card element and hide a zip code 
+    this.cardElement = elements.create('card', { hidePostalCode: true });
 
-   // add an instance of UI component to card-element
-   this.cardElement.mount('#card-element');
-   //add event binding on the 'change' event on the card element
-   this.cardElement.on('change', (event) =>{
-     ///add handle to card element errors
-     this.displayError= document.getElementById('card-errors');
-     if(event.complete){
-  this.displayError.textContent="";
-     }else if(event.error){
-     this.displayError.textContent = event.error.message;
-     }
-   });
+    // add an instance of UI component to card-element
+    this.cardElement.mount('#card-element');
+    //add event binding on the 'change' event on the card element
+    this.cardElement.on('change', (event) => {
+      ///add handle to card element errors
+      this.displayError = document.getElementById('card-errors');
+      if (event.complete) {
+        this.displayError.textContent = "";
+      } else if (event.error) {
+        this.displayError.textContent = event.error.message;
+      }
+    });
   }
 
   get firstName(): any { return this.checkoutFormGroup.get('customer.firstName'); }
@@ -242,21 +242,44 @@ export class CheckoutComponent implements OnInit {
     purchase.order = order;
     purchase.orderItems = orderItems;
 
-    // call REST API via the CheckoutService
-    this.checkoutService.placeOrder(purchase).subscribe({
-      next: response => {
-        alert(`Your order has been received.\nOrder tracking number: ${response.orderTrackingNumber}`);
+    //compute payment info 
+    this.paymentInfo.amount = this.totalPrice * 100;
+    this.paymentInfo.currency = 'USD';
+    // if valid form then 
+    // create pyment intent
+    //confirm card element
+    // place order
 
-        // reset cart
-        this.resetCart();
-
-      },
-      error: err => {
-        alert(`There was an error: ${err.message}`);
-      }
-    }
-    );
-
+    if (!this.checkoutFormGroup.invalid && this.displayError.textContent === "") {
+      this.checkoutService.createPaymentIntent(this.paymentInfo).subscribe(
+        (paymentIntentResponse) => {
+          this.stripe.confirmCardPayment(paymentIntentResponse.client_secret, {
+            payment_method: {
+              card: this.cardElement
+            }
+          }, { handleActions: false }).then(function (result) {
+            if (result.error) {
+              //inform the customer there are error
+              alert(` htere was an error : ${result.error.message}`);
+            } else {
+              // this.checkoutService.placeOrder(purchase).subscribe(
+              //   next: response => {
+              //     alert(`Your order has been received.\nOrder tracking number: ${response.orderTrackingNumber}`);
+              //     this.resetCart();
+              //   }, error : err => {
+              //     alert(`There was an error: ${err.message}`);
+              //   }
+              // )
+            }
+          }.bind(this))       
+          //////////////////////
+        }
+      )
+    }else
+{
+  this.checkoutFormGroup.markAllAsTouched();
+  return;
+}    
   }
   resetCart() {
     // reset cart data
